@@ -1,47 +1,60 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.example.repository.CustomerRepository;
+import org.example.repository.DVDRepository;
+import org.example.repository.RentalRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@Service
 public class DVDStore {
-    private final List<DVD> inventory = new ArrayList<>();
-    private final Map<Integer, DVD> available = new HashMap<>();
-    private final List<Rental> rentals = new ArrayList<>();
+    private final DVDRepository dvdRepository;
+    private final CustomerRepository customerRepository;
+    private final RentalRepository rentalRepository;
+
+    @Autowired
+    public DVDStore(DVDRepository dvdRepository, CustomerRepository customerRepository, RentalRepository rentalRepository) {
+        this.dvdRepository = dvdRepository;
+        this.customerRepository = customerRepository;
+        this.rentalRepository = rentalRepository;
+    }
 
     public void addDVD(String title, double pricePerDay, int quantity) {
         for (int i = 0; i < quantity; i++) {
             DVD dvd = new DVD(title, pricePerDay);
-            inventory.add(dvd);
-            available.put(dvd.getId(), dvd);
+            dvdRepository.save(dvd);
         }
     }
 
     public void rentDVD(int dvdId, Customer customer, int days) {
-        if (!available.containsKey(dvdId)) {
+        DVD dvd = dvdRepository.findById(dvdId).orElse(null);
+        if (dvd == null || !dvd.isAvailable()) {
             System.out.println("DVD #" + dvdId + " is not available.");
             return;
         }
-        DVD dvd = available.remove(dvdId);
+        customer = customerRepository.save(customer); // Save or update
         Rental rental = new Rental(dvd, customer, days);
-        rentals.add(rental);
+        rentalRepository.save(rental);
+
+        dvd.setAvailable(false);
+        dvdRepository.save(dvd);
+
         System.out.println("Rented: " + rental);
     }
 
     public void returnDVD(int dvdId) {
-        Rental rentalToReturn = null;
-        for (Rental rental : rentals) {
-            if (rental.getDvd().getId() == dvdId) {
-                rentalToReturn = rental;
-                break;
-            }
-        }
-
-        if (rentalToReturn != null) {
-            rentals.remove(rentalToReturn);
-            available.put(rentalToReturn.getDvd().getId(), rentalToReturn.getDvd());
-            System.out.println("Returned: " + rentalToReturn.getDvd());
+        Rental rental = rentalRepository.findAll().stream()
+                .filter(r -> r.getDvd().getId() == dvdId)
+                .findFirst()
+                .orElse(null);
+        if (rental != null) {
+            DVD dvd = rental.getDvd();
+            dvd.setAvailable(true);
+            dvdRepository.save(dvd);
+            rentalRepository.delete(rental);
+            System.out.println("Returned: " + dvd);
         } else {
             System.out.println("No rental found for DVD #" + dvdId);
         }
@@ -49,15 +62,13 @@ public class DVDStore {
 
     public void showAvailableDVDs() {
         System.out.println("Available DVDs:");
-        for (DVD dvd : available.values()) {
-            System.out.println(dvd);
-        }
+        List<DVD> dvds = dvdRepository.findByAvailableTrue();
+        dvds.forEach(System.out::println);
     }
 
     public void showRentedDVDs() {
         System.out.println("Rented DVDs:");
-        for (Rental rental : rentals) {
-            System.out.println(rental);
-        }
+        List<Rental> rentals = rentalRepository.findAll();
+        rentals.forEach(System.out::println);
     }
 }

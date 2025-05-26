@@ -1,8 +1,14 @@
 package org.example;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        DVDStore store = new DVDStore();
+        ApplicationContext context = SpringApplication.run(Main.class, args);
+        DVDStore store = context.getBean(DVDStore.class);
 
         store.addDVD("The Matrix", 20.0, 2);
         store.addDVD("Inception", 25.0, 1);

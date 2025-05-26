@@ -1,0 +1,8 @@
+org\example\Customer.class
+org\example\Main.class
+org\example\repository\CustomerRepository.class
+org\example\DVD.class
+org\example\Rental.class
+org\example\repository\RentalRepository.class
+org\example\DVDStore.class
+org\example\repository\DVDRepository.class

@@ -1,10 +1,24 @@
 package org.example;
 
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
-@AllArgsConstructor
 @ToString
+@Entity
+@Table(name = "customer")
 public class Customer {
-    private final String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    public Customer() {
+    }
+
+    public Customer(String name) {
+        this.name = name;
+    }
 }

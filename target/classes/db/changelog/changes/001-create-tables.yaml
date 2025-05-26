@@ -1,0 +1,84 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: your-name
+      changes:
+        - createTable:
+            tableName: dvd
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_per_day
+                  type: double
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: customer
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: rental
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: dvd_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rental_dvd
+                    references: dvd(id)
+              - column:
+                  name: customer_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rental_customer
+                    references: customer(id)
+              - column:
+                  name: rent_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: days
+                  type: integer
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2
+      author: your-name
+      changes:
+        - addColumn:
+            tableName: dvd
+            columns:
+              - column:
+                  name: available
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
